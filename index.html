@@ -1,693 +1,860 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f6f2">
+  <meta name="description" content="Explore rent burden across Broward County, Florida, using 2024 American Community Survey estimates.">
+  <title>Priced Out of Broward: Where Is Rent Hardest to Afford?</title>
+  <link rel="preconnect" href="https://tile.openstreetmap.org">
+  <link rel="preconnect" href="https://api.censusreporter.org">
+  <link rel="preconnect" href="https://tigerweb.geo.census.gov">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172f32;
+      --muted: #627476;
+      --line: #dce3df;
+      --paper: #f7f6f2;
+      --card: #fffefa;
+      --teal: #24645d;
+      --orange: #e8794f;
+      --soft-orange: #fae9df;
+      --shadow: 0 14px 40px rgb(23 47 50 / 7%);
+    }
 
-<meta charset="utf-8">
-<meta name="generator" content="quarto-1.10.19">
+    * { box-sizing: border-box; }
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
 
+    a { color: var(--teal); }
+    button, input { font: inherit; }
+    button { color: inherit; }
 
-<title>Where Is Rent Hardest to Afford? – Priced Out of Broward</title>
-<style>
-/* Default styles provided by pandoc.
-** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-*/
-span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: 1.5em;}
-div.column{flex: auto;}
-@media screen {
-div.columns{gap: min(4vw, 1.5em);}
-div.column{overflow-x: auto;}
-}
-div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-ul.task-list{list-style: none;}
-ul.task-list li input[type="checkbox"] {
-  width: 0.8em;
-  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
-  vertical-align: middle;
-}
-</style>
+    .page { width: min(1180px, calc(100% - 48px)); margin: 0 auto; }
 
+    .topbar {
+      border-bottom: 1px solid var(--line);
+      background: rgb(255 254 250 / 75%);
+    }
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-22ddd0bc8811bb05b22c9f1af5ad3da3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
-<script id="quarto-search-options" type="application/json">{
-  "location": "sidebar",
-  "copy-button": false,
-  "collapse-after": 3,
-  "panel-placement": "start",
-  "type": "textbox",
-  "limit": 50,
-  "keyboard-shortcut": [
-    "f",
-    "/",
-    "s"
-  ],
-  "show-item-context": false,
-  "language": {
-    "search-no-results-text": "No results",
-    "search-matching-documents-text": "matching documents",
-    "search-copy-link-title": "Copy link to search",
-    "search-hide-matches-text": "Hide additional matches",
-    "search-more-match-text": "more match in this document",
-    "search-more-matches-text": "more matches in this document",
-    "search-clear-button-title": "Clear",
-    "search-text-placeholder": "",
-    "search-detached-cancel-button-title": "Cancel",
-    "search-submit-button-title": "Submit",
-    "search-label": "Search"
-  }
-}</script>
+    .topbar-inner {
+      min-height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
 
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 750;
+      letter-spacing: .03em;
+      text-decoration: none;
+    }
 
+    .brand-mark {
+      width: 25px;
+      height: 25px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: var(--teal);
+      color: white;
+      font-size: 14px;
+    }
+
+    .topbar-note {
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+    }
+
+    main { padding: 48px 0 60px; }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin: 0 0 12px;
+      color: var(--teal);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--orange);
+      content: "";
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      max-width: 760px;
+      margin-bottom: 12px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(36px, 5vw, 58px);
+      font-weight: 500;
+      letter-spacing: -.045em;
+      line-height: 1.05;
+    }
+
+    .dek {
+      max-width: 710px;
+      margin-bottom: 25px;
+      color: #53686a;
+      font-size: 16px;
+    }
+
+    .dek strong { color: var(--ink); }
+
+    .data-stamp {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 11px;
+      border: 1px solid #e8d8ca;
+      border-radius: 99px;
+      background: #fffaf5;
+      color: #75503d;
+      font-size: 11px;
+      font-weight: 750;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .data-stamp span {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--orange);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 13px;
+      margin: 30px 0 32px;
+    }
+
+    .stat {
+      min-height: 112px;
+      padding: 18px 20px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--card);
+    }
+
+    .stat-label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .stat-value {
+      display: block;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 29px;
+      letter-spacing: -.04em;
+      line-height: 1.1;
+    }
+
+    .stat:first-child .stat-value { color: #a9472c; }
+    .stat-note { display: block; margin-top: 5px; color: #879394; font-size: 11px; }
+
+    .section-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 0 0 14px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 25px;
+      font-weight: 500;
+      letter-spacing: -.025em;
+    }
+
+    .section-heading p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .map-card, .table-card, .method-card {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+
+    .map-tools {
+      min-height: 65px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 12px 17px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .map-caption {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.35;
+    }
+
+    .map-caption strong { font-size: 13px; }
+    .map-caption span { color: var(--muted); font-size: 11px; }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px 13px;
+      color: #475b5d;
+      font-size: 11px;
+    }
+
+    .legend-title { color: var(--muted); }
+    .legend-item { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+    .swatch { width: 11px; height: 11px; border: 1px solid rgb(23 47 50 / 15%); border-radius: 3px; }
+
+    .map-view {
+      position: relative;
+      width: 100%;
+      height: min(59vw, 570px);
+      min-height: 390px;
+      overflow: hidden;
+      background: #e7eeeb;
+    }
+
+    #static-map {
+      position: absolute;
+      inset: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    #map {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      background: #e7eeeb;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .map-view.is-interactive #static-map { visibility: hidden; }
+    .map-view.is-interactive #map { opacity: 1; pointer-events: auto; }
+
+    @media (max-width: 720px) {
+      .map-view { height: 440px; min-height: 340px; }
+    }
+
+    .map-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-height: 42px;
+      padding: 9px 16px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .map-foot a { font-weight: 700; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+
+    .map-layout { margin-bottom: 37px; }
+
+    .data-status {
+      min-height: 24px;
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .data-status.error { color: #a12f22; }
+
+    .explore-heading { margin-top: 36px; }
+
+    .search-wrap {
+      position: relative;
+      width: min(100%, 300px);
+    }
+
+    .search-wrap input {
+      width: 100%;
+      min-height: 42px;
+      padding: 9px 13px 9px 37px;
+      border: 1px solid #ccd7d3;
+      border-radius: 8px;
+      outline: none;
+      background: #fffefa;
+      color: var(--ink);
+      font-size: 13px;
+    }
+
+    .search-wrap input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgb(36 100 93 / 12%); }
+
+    .search-icon {
+      position: absolute;
+      top: 10px;
+      left: 13px;
+      color: #7a8a8b;
+      font-size: 16px;
+      pointer-events: none;
+    }
+
+    .table-topline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .download {
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--teal);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 750;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .table-scroll { max-height: 500px; overflow: auto; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+    thead {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #f2f5f1;
+      color: #526668;
+      text-align: left;
+    }
+
+    th, td { padding: 12px 16px; border-bottom: 1px solid #edf0ec; }
+    th { font-size: 11px; font-weight: 750; letter-spacing: .035em; }
+    td.numeric, th.numeric { text-align: right; font-variant-numeric: tabular-nums; }
+
+    tbody tr { cursor: pointer; transition: background .15s ease; }
+    tbody tr:hover, tbody tr:focus { outline: none; background: #f4f8f4; }
+    tbody tr:last-child td { border-bottom: 0; }
+
+    .tract-name { color: var(--ink); font-weight: 700; }
+
+    .share-cell {
+      display: inline-block;
+      min-width: 54px;
+      padding: 4px 8px;
+      border-radius: 99px;
+      color: #48352d;
+      font-size: 11px;
+      font-weight: 750;
+      text-align: center;
+    }
+
+    .empty-row { padding: 28px 16px; color: var(--muted); text-align: center; }
+
+    .method-card {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      margin-top: 24px;
+      padding: 22px 24px;
+      box-shadow: none;
+    }
+
+    .method-card h2 {
+      margin-bottom: 8px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 19px;
+      font-weight: 500;
+    }
+
+    .method-card p { margin: 0; color: #607274; font-size: 12px; }
+    .method-card a { font-weight: 650; }
+
+    footer {
+      padding: 20px 0 30px;
+      border-top: 1px solid var(--line);
+      color: #7a8989;
+      font-size: 11px;
+    }
+
+    .leaflet-tooltip {
+      padding: 7px 10px;
+      border: 1px solid #dfe5df;
+      border-radius: 7px;
+      box-shadow: 0 5px 16px rgb(23 47 50 / 12%);
+      color: var(--ink);
+      font-size: 12px;
+    }
+
+    .leaflet-tooltip strong { display: block; margin-bottom: 2px; }
+    .leaflet-control-attribution { font-size: 9px !important; }
+
+    @media (max-width: 720px) {
+      .page { width: min(100% - 30px, 560px); }
+      main { padding-top: 35px; }
+      .topbar-note { font-size: 10px; text-align: right; }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin: 23px 0 28px; }
+      .stat { min-height: 102px; padding: 15px; }
+      .stat-value { font-size: 25px; }
+      .section-heading { align-items: start; flex-direction: column; }
+      .map-tools { align-items: flex-start; flex-direction: column; gap: 9px; }
+      .legend { justify-content: flex-start; gap: 7px 10px; }
+      .map-foot { align-items: flex-start; flex-direction: column; gap: 3px; }
+      .explore-heading { align-items: stretch; }
+      .search-wrap { width: 100%; }
+      .method-card { grid-template-columns: 1fr; gap: 18px; padding: 19px; }
+      th, td { padding: 10px 11px; }
+      table { font-size: 12px; }
+      th { font-size: 10px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
 </head>
-
-<body class="fullcontent quarto-light">
-
-<div id="quarto-search-results"></div>
-<!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
-<!-- sidebar -->
-<!-- margin-sidebar -->
-    
-<!-- main -->
-<main class="content" id="quarto-document-content">
-
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">Where Is Rent Hardest to Afford?</h1>
-<p class="subtitle lead">A census-tract view of rent burden in Broward County, Florida</p>
-</div>
-
-
-
-<div class="quarto-title-meta">
-
-    
-  
-    
+<body>
+  <div class="topbar">
+    <div class="page topbar-inner">
+      <a class="brand" href="#" aria-label="Priced Out of Broward home">
+        <span class="brand-mark" aria-hidden="true">⌂</span>
+        <span>THE BROWARD HOUSING STORY</span>
+      </a>
+      <span class="topbar-note">A neighborhood-level look at rent</span>
+    </div>
   </div>
-  
 
+  <main class="page">
+    <header>
+      <p class="eyebrow">Broward County, Florida</p>
+      <h1>Priced out of Broward?</h1>
+      <p class="dek"><strong>Where is rent hardest to afford?</strong> Explore the share of renter households spending at least 30% of their income on rent, tract by tract.</p>
+      <span class="data-stamp"><span aria-hidden="true"></span> 2024 American Community Survey · 5-year estimates</span>
+    </header>
 
-</header>
+    <section class="stats" aria-label="Broward County summary">
+      <article class="stat">
+        <span class="stat-label">Rent-burdened share</span>
+        <strong class="stat-value" id="overall-share">Loading</strong>
+        <span class="stat-note">of renter households with a computed ratio</span>
+      </article>
+      <article class="stat">
+        <span class="stat-label">Rent-burdened households</span>
+        <strong class="stat-value" id="total-burdened">Loading</strong>
+        <span class="stat-note">estimated across Broward County</span>
+      </article>
+      <article class="stat">
+        <span class="stat-label">Renter households</span>
+        <strong class="stat-value" id="total-renters">Loading</strong>
+        <span class="stat-note">ACS estimate, all rent-to-income ratios</span>
+      </article>
+      <article class="stat">
+        <span class="stat-label">Census tracts</span>
+        <strong class="stat-value" id="tract-count">Loading</strong>
+        <span class="stat-note">tracts in Broward County</span>
+      </article>
+    </section>
 
+    <section class="map-layout" aria-labelledby="map-title">
+      <div class="section-heading">
+        <div>
+          <h2 id="map-title">The rent-burden map</h2>
+          <p>Each shape is a census tract. Darker red means more renters are burdened—and rent is harder to afford.</p>
+        </div>
+      </div>
+      <div class="map-card">
+        <div class="map-tools">
+          <div class="map-caption">
+            <strong>Share of renter households paying 30% or more</strong>
+            <span>Click a tract to see its estimates</span>
+          </div>
+          <div class="legend" aria-label="Map color legend">
+            <span class="legend-title">Rent-burdened renters:</span>
+            <span class="legend-item"><i class="swatch" style="background:#f2d3bb"></i>Under 45%</span>
+            <span class="legend-item"><i class="swatch" style="background:#e8a77f"></i>45-59%</span>
+            <span class="legend-item"><i class="swatch" style="background:#d66b4b"></i>60-69%</span>
+            <span class="legend-item"><i class="swatch" style="background:#9e3f32"></i>70%+ · hardest to afford</span>
+          </div>
+        </div>
+        <div class="map-view" id="map-view">
+          <img id="static-map" src="broward-rent-burden-map.svg" alt="Broward County map shaded by rent burden across 417 census tracts. Darker red indicates a higher share of burdened renters.">
+          <div id="map" role="application" aria-label="Interactive map of rent burden in Broward County" aria-hidden="true"></div>
+        </div>
+        <div class="map-foot">
+          <span id="map-status" role="status">Loading census tracts and ACS estimates...</span>
+          <a href="https://www.census.gov/programs-surveys/acs" target="_blank" rel="noreferrer">About the ACS ↗</a>
+        </div>
+      </div>
+      <p class="data-status" id="data-status" role="status" aria-live="polite"></p>
+    </section>
 
-<p>Rent burden is commonly defined as spending at least 30% of household income on gross rent. This page uses 2024 American Community Survey (ACS) 5-year estimates for renter households in Broward County.</p>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>The numbers are estimates, not exact counts. The burden rate excludes households for which the ACS did not compute a rent-to-income ratio.</p>
-</div>
-</div>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Broward County summary</th>
-<th style="text-align: right;">Estimate</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Renter households</td>
-<td style="text-align: right;"><span id="total-renters">Loading…</span></td>
-</tr>
-<tr class="even">
-<td>Rent-burdened households</td>
-<td style="text-align: right;"><span id="total-burdened">Loading…</span></td>
-</tr>
-<tr class="odd">
-<td>Rent-burdened share</td>
-<td style="text-align: right;"><span id="overall-share">Loading…</span></td>
-</tr>
-<tr class="even">
-<td>Census tracts</td>
-<td style="text-align: right;"><span id="tract-count">Loading…</span></td>
-</tr>
-</tbody>
-</table>
-<section id="rent-burden-by-census-tract" class="level2">
-<h2 class="anchored" data-anchor-id="rent-burden-by-census-tract">Rent burden by census tract</h2>
-<p>Use the search box to find a tract or GEOID. The share is the estimated percentage of renter households paying 30% or more of income on gross rent.</p>
-<p><label for="tract-search">Search tracts</label> <input id="tract-search" type="search" placeholder="Search by tract name or GEOID"></p>
-<p>
-<a href="data/broward_rent_burden_2024.csv" download="">Download the tract data (CSV)</a>
-</p>
-<div id="data-status" role="status">
-Loading census data…
-</div>
-<div class="table-responsive">
-<table id="tract-table" class="table table-striped">
-<thead>
-<tr>
-<th scope="col">
-Census tract
-</th>
-<th scope="col">
-Renter households
-</th>
-<th scope="col">
-Rent-burdened households
-</th>
-<th scope="col">
-Rent-burdened share
-</th>
-</tr>
-</thead>
-<tbody>
-</tbody>
-</table>
-</div>
-<p>Source: U.S. Census Bureau, 2024 ACS 5-year estimates, table B25070. Rent-burdened households include those spending 30.0% or more of income on gross rent.</p>
-<script>
-(() => {
-  const csvUrl = "data/broward_rent_burden_2024.csv";
-  const status = document.getElementById("data-status");
-  const tbody = document.querySelector("#tract-table tbody");
-  const search = document.getElementById("tract-search");
-  let tracts = [];
+    <section aria-labelledby="table-title">
+      <div class="section-heading explore-heading">
+        <div>
+          <h2 id="table-title">Explore every tract</h2>
+          <p>Search by tract number or GEOID. Select a row to locate it on the map.</p>
+        </div>
+        <label class="search-wrap">
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <input id="tract-search" type="search" placeholder="Search tracts..." autocomplete="off" aria-label="Search tracts by name or GEOID">
+        </label>
+      </div>
+      <div class="table-card">
+        <div class="table-topline">
+          <span id="table-status">Waiting for census data</span>
+          <button class="download" id="download-data" type="button" disabled>Download CSV</button>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Census tract</th>
+                <th class="numeric" scope="col">Renter households</th>
+                <th class="numeric" scope="col">Burdened households</th>
+                <th class="numeric" scope="col">Rent-burdened share</th>
+              </tr>
+            </thead>
+            <tbody id="tract-rows">
+              <tr><td class="empty-row" colspan="4">Loading tract estimates...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
 
-  function parseCsv(text) {
-    const rows = [];
-    let row = [];
-    let field = "";
-    let quoted = false;
+    <aside class="method-card" aria-label="About these estimates">
+      <div>
+        <h2>What counts as rent-burdened?</h2>
+        <p>Households spending 30% or more of their income on gross rent. The tract share is burdened households divided by renter households for whom the ACS computed a rent-to-income ratio; "not computed" households are excluded from that denominator.</p>
+      </div>
+      <div>
+        <h2>Read the map with care</h2>
+        <p>These are estimates from the 2020-2024 ACS 5-year survey, not a count of every household. A tract's estimate has a margin of error, and small differences between neighboring tracts may not be meaningful. Map boundaries: <a href="https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html" target="_blank" rel="noreferrer">U.S. Census TIGER/Line</a>.</p>
+      </div>
+    </aside>
+  </main>
 
-    for (let i = 0; i < text.length; i += 1) {
-      const char = text[i];
-      if (quoted && char === '"' && text[i + 1] === '"') {
-        field += '"';
-        i += 1;
-      } else if (char === '"') {
-        quoted = !quoted;
-      } else if (char === "," && !quoted) {
-        row.push(field);
-        field = "";
-      } else if ((char === "\n" || char === "\r") && !quoted) {
-        if (char === "\r" && text[i + 1] === "\n") i += 1;
-        row.push(field);
-        if (row.some((value) => value !== "")) rows.push(row);
-        row = [];
-        field = "";
-      } else {
-        field += char;
-      }
-    }
+  <footer>
+    <div class="page">Source: U.S. Census Bureau, 2024 ACS 5-year estimates, table B25070. Estimates retrieved from <a href="https://www.censusreporter.org/" target="_blank" rel="noreferrer">Census Reporter</a>; boundaries from Census TIGERweb. Map tiles © OpenStreetMap contributors.</div>
+  </footer>
 
-    if (field !== "" || row.length > 0) {
-      row.push(field);
-      rows.push(row);
-    }
-    const [headers, ...records] = rows;
-    return records.map((record) =>
-      Object.fromEntries(headers.map((header, index) => [header, record[index]]))
-    );
-  }
+  <script>
+    (() => {
+      const geometryUrl = "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/Tracts_Blocks/MapServer/0/query";
+      const dataUrl = "https://api.censusreporter.org/1.0/data/show/acs2024_5yr";
+      const batchSize = 40;
+      const mapStatus = document.getElementById("map-status");
+      const mapView = document.getElementById("map-view");
+      const staticMap = document.getElementById("static-map");
+      const interactiveMap = document.getElementById("map");
+      const dataStatus = document.getElementById("data-status");
+      const tableStatus = document.getElementById("table-status");
+      const rows = document.getElementById("tract-rows");
+      const search = document.getElementById("tract-search");
+      const downloadButton = document.getElementById("download-data");
+      let map;
+      let tractLayer;
+      let tracts = [];
+      let selectedLayer;
 
-  function formatCount(value) {
-    return Number(value).toLocaleString();
-  }
-
-  function renderTable() {
-    const query = search.value.trim().toLowerCase();
-    const matches = tracts.filter((tract) =>
-      `${tract.NAME} ${tract.GEOID}`.toLowerCase().includes(query)
-    );
-    tbody.replaceChildren();
-
-    for (const tract of matches) {
-      const row = document.createElement("tr");
-      const values = [
-        tract.NAME,
-        formatCount(tract.renter_households),
-        formatCount(tract.rent_burdened_households),
-        `${(Number(tract.rent_burdened_share) * 100).toFixed(1)}%`
-      ];
-      for (const value of values) {
-        const cell = document.createElement("td");
-        cell.textContent = value;
-        row.append(cell);
-      }
-      tbody.append(row);
-    }
-    status.textContent = `Showing ${matches.length} of ${tracts.length} census tracts.`;
-  }
-
-  fetch(csvUrl)
-    .then((response) => {
-      if (!response.ok) throw new Error("Census CSV not found");
-      return response.text();
-    })
-    .then((csv) => {
-      tracts = parseCsv(csv);
-      const renters = tracts.reduce((sum, tract) => sum + Number(tract.renter_households), 0);
-      const eligible = tracts.reduce((sum, tract) => sum + Number(tract.eligible_renter_households), 0);
-      const burdened = tracts.reduce((sum, tract) => sum + Number(tract.rent_burdened_households), 0);
-      document.getElementById("total-renters").textContent = formatCount(renters);
-      document.getElementById("total-burdened").textContent = formatCount(burdened);
-      document.getElementById("overall-share").textContent =
-        `${(100 * burdened / eligible).toFixed(1)}%`;
-      document.getElementById("tract-count").textContent = formatCount(tracts.length);
-      renderTable();
-    })
-    .catch(() => {
-      status.textContent =
-        "Data file not found. Configure your Census API key, run download.R, and publish the site again.";
-      document.querySelector("#tract-table thead").hidden = true;
-    });
-
-  search.addEventListener("input", renderTable);
-})();
-</script>
-
-
-</section>
-
-</main> <!-- /main -->
-<script id="quarto-html-after-body" type="application/javascript">
-  window.document.addEventListener("DOMContentLoaded", function (event) {
-    const icon = "";
-    const anchorJS = new window.AnchorJS();
-    anchorJS.options = {
-      placement: 'right',
-      icon: icon
-    };
-    anchorJS.add('.anchored');
-    const isCodeAnnotation = (el) => {
-      for (const clz of el.classList) {
-        if (clz.startsWith('code-annotation-')) {                     
-          return true;
-        }
-      }
-      return false;
-    }
-    const onCopySuccess = function(e) {
-      // button target
-      const button = e.trigger;
-      // don't keep focus
-      button.blur();
-      // flash "checked"
-      button.classList.add('code-copy-button-checked');
-      var currentTitle = button.getAttribute("title");
-      button.setAttribute("title", "Copied!");
-      let tooltip;
-      if (window.bootstrap) {
-        button.setAttribute("data-bs-toggle", "tooltip");
-        button.setAttribute("data-bs-placement", "left");
-        button.setAttribute("data-bs-title", "Copied!");
-        tooltip = new bootstrap.Tooltip(button, 
-          { trigger: "manual", 
-            customClass: "code-copy-button-tooltip",
-            offset: [0, -8]});
-        tooltip.show();    
-      }
-      setTimeout(function() {
-        if (tooltip) {
-          tooltip.hide();
-          button.removeAttribute("data-bs-title");
-          button.removeAttribute("data-bs-toggle");
-          button.removeAttribute("data-bs-placement");
-        }
-        button.setAttribute("title", currentTitle);
-        button.classList.remove('code-copy-button-checked');
-      }, 1000);
-      // clear code selection
-      e.clearSelection();
-    }
-    const getTextToCopy = function(trigger) {
-      const outerScaffold = trigger.parentElement.cloneNode(true);
-      const codeEl = outerScaffold.querySelector('code');
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-      text: getTextToCopy
-    });
-    clipboard.on('success', onCopySuccess);
-    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-        text: getTextToCopy,
-        container: window.document.getElementById('quarto-embedded-source-code-modal')
-      });
-      clipboardModal.on('success', onCopySuccess);
-    }
-      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-      var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
-      var isInternal = (href) => {
-          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
-      }
-      // Inspect non-navigation links and adorn them if external
-     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
-      for (var i=0; i<links.length; i++) {
-        const link = links[i];
-        if (!isInternal(link.href)) {
-          // undo the damage that might have been done by quarto-nav.js in the case of
-          // links that we want to consider external
-          if (link.dataset.originalHref !== undefined) {
-            link.href = link.dataset.originalHref;
-          }
-        }
-      }
-    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
-      const config = {
-        allowHTML: true,
-        maxWidth: 500,
-        delay: 100,
-        arrow: false,
-        appendTo: function(el) {
-            return el.parentElement;
-        },
-        interactive: true,
-        interactiveBorder: 10,
-        theme: 'quarto',
-        placement: 'bottom-start',
+      const formatCount = (value) => Number(value).toLocaleString("en-US");
+      const shareColor = (share) => {
+        if (!Number.isFinite(share)) return "#d9e1dd";
+        if (share < 0.45) return "#f2d3bb";
+        if (share < 0.60) return "#e8a77f";
+        if (share < 0.70) return "#d66b4b";
+        return "#9e3f32";
       };
-      if (contentFn) {
-        config.content = contentFn;
+
+      function initMap() {
+        if (!window.L) throw new Error("The map library did not load. Check your internet connection and reload the page.");
+        map = L.map("map", { scrollWheelZoom: false, zoomControl: true });
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 18,
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        map.setView([26.12, -80.25], 10);
       }
-      if (onTriggerFn) {
-        config.onTrigger = onTriggerFn;
+
+      async function fetchJson(url) {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Request failed (${response.status}): ${new URL(url).hostname}`);
+        return response.json();
       }
-      if (onUntriggerFn) {
-        config.onUntrigger = onUntriggerFn;
-      }
-      window.tippy(el, config); 
-    }
-    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
-    for (var i=0; i<noterefs.length; i++) {
-      const ref = noterefs[i];
-      tippyHover(ref, function() {
-        // use id or data attribute instead here
-        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
-        try { href = new URL(href).hash; } catch {}
-        const id = href.replace(/^#\/?/, "");
-        const note = window.document.getElementById(id);
-        if (note) {
-          return note.innerHTML;
-        } else {
-          return "";
-        }
-      });
-    }
-    const xrefs = window.document.querySelectorAll('a.quarto-xref');
-    const processXRef = (id, note) => {
-      // Strip column container classes
-      const stripColumnClz = (el) => {
-        el.classList.remove("page-full", "page-columns");
-        if (el.children) {
-          for (const child of el.children) {
-            stripColumnClz(child);
+
+      async function loadEstimates(ids) {
+        const estimates = {};
+        for (let groupStart = 0; groupStart < ids.length; groupStart += batchSize * 3) {
+          const batchStarts = [];
+          for (let start = groupStart; start < Math.min(groupStart + batchSize * 3, ids.length); start += batchSize) {
+            batchStarts.push(start);
           }
-        }
-      }
-      stripColumnClz(note)
-      if (id === null || id.startsWith('sec-')) {
-        // Special case sections, only their first couple elements
-        const container = document.createElement("div");
-        if (note.children && note.children.length > 2) {
-          container.appendChild(note.children[0].cloneNode(true));
-          for (let i = 1; i < note.children.length; i++) {
-            const child = note.children[i];
-            if (child.tagName === "P" && child.innerText === "") {
-              continue;
-            } else {
-              container.appendChild(child.cloneNode(true));
-              break;
-            }
-          }
-          if (window.Quarto?.typesetMath) {
-            window.Quarto.typesetMath(container);
-          }
-          return container.innerHTML
-        } else {
-          if (window.Quarto?.typesetMath) {
-            window.Quarto.typesetMath(note);
-          }
-          return note.innerHTML;
-        }
-      } else {
-        // Remove any anchor links if they are present
-        const anchorLink = note.querySelector('a.anchorjs-link');
-        if (anchorLink) {
-          anchorLink.remove();
-        }
-        if (window.Quarto?.typesetMath) {
-          window.Quarto.typesetMath(note);
-        }
-        if (note.classList.contains("callout")) {
-          return note.outerHTML;
-        } else {
-          return note.innerHTML;
-        }
-      }
-    }
-    for (var i=0; i<xrefs.length; i++) {
-      const xref = xrefs[i];
-      tippyHover(xref, undefined, function(instance) {
-        instance.disable();
-        let url = xref.getAttribute('href');
-        let hash = undefined; 
-        if (url.startsWith('#')) {
-          hash = url;
-        } else {
-          try { hash = new URL(url).hash; } catch {}
-        }
-        if (hash) {
-          const id = hash.replace(/^#\/?/, "");
-          const note = window.document.getElementById(id);
-          if (note !== null) {
-            try {
-              const html = processXRef(id, note.cloneNode(true));
-              instance.setContent(html);
-            } finally {
-              instance.enable();
-              instance.show();
-            }
-          } else {
-            // See if we can fetch this
-            fetch(url.split('#')[0])
-            .then(res => res.text())
-            .then(html => {
-              const parser = new DOMParser();
-              const htmlDoc = parser.parseFromString(html, "text/html");
-              const note = htmlDoc.getElementById(id);
-              if (note !== null) {
-                const html = processXRef(id, note);
-                instance.setContent(html);
-              } 
-            }).finally(() => {
-              instance.enable();
-              instance.show();
+          const batches = await Promise.all(batchStarts.map(async (start) => {
+            const params = new URLSearchParams({
+              table_ids: "B25070",
+              geo_ids: ids.slice(start, start + batchSize).join(",")
             });
-          }
-        } else {
-          // See if we can fetch a full url (with no hash to target)
-          // This is a special case and we should probably do some content thinning / targeting
-          fetch(url)
-          .then(res => res.text())
-          .then(html => {
-            const parser = new DOMParser();
-            const htmlDoc = parser.parseFromString(html, "text/html");
-            const note = htmlDoc.querySelector('main.content');
-            if (note !== null) {
-              // This should only happen for chapter cross references
-              // (since there is no id in the URL)
-              // remove the first header
-              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
-                note.children[0].remove();
-              }
-              const html = processXRef(null, note);
-              instance.setContent(html);
-            } 
-          }).finally(() => {
-            instance.enable();
-            instance.show();
-          });
+            const payload = await fetchJson(`${dataUrl}?${params}`);
+            if (!payload.data) throw new Error("The ACS response did not contain tract estimates.");
+            return payload.data;
+          }));
+          for (const batch of batches) Object.assign(estimates, batch);
         }
-      }, function(instance) {
-      });
-    }
-        let selectedAnnoteEl;
-        const selectorForAnnotation = ( cell, annotation) => {
-          let cellAttr = 'data-code-cell="' + cell + '"';
-          let lineAttr = 'data-code-annotation="' +  annotation + '"';
-          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
-          return selector;
-        }
-        const selectCodeLines = (annoteEl) => {
-          const doc = window.document;
-          const targetCell = annoteEl.getAttribute("data-target-cell");
-          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
-          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
-          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
-          const lineIds = lines.map((line) => {
-            return targetCell + "-" + line;
-          })
-          let top = null;
-          let height = null;
-          let parent = null;
-          if (lineIds.length > 0) {
-              //compute the position of the single el (top and bottom and make a div)
-              const el = window.document.getElementById(lineIds[0]);
-              top = el.offsetTop;
-              height = el.offsetHeight;
-              parent = el.parentElement.parentElement;
-            if (lineIds.length > 1) {
-              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-              height = bottom - top;
-            }
-            if (top !== null && height !== null && parent !== null) {
-              // cook up a div (if necessary) and position it 
-              let div = window.document.getElementById("code-annotation-line-highlight");
-              if (div === null) {
-                div = window.document.createElement("div");
-                div.setAttribute("id", "code-annotation-line-highlight");
-                div.style.position = 'absolute';
-                parent.appendChild(div);
-              }
-              div.style.top = top - 2 + "px";
-              div.style.height = height + 4 + "px";
-              div.style.left = 0;
-              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-              if (gutterDiv === null) {
-                gutterDiv = window.document.createElement("div");
-                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-                gutterDiv.style.position = 'absolute';
-                const codeCell = window.document.getElementById(targetCell);
-                const gutter = codeCell.querySelector('.code-annotation-gutter');
-                gutter.appendChild(gutterDiv);
-              }
-              gutterDiv.style.top = top - 2 + "px";
-              gutterDiv.style.height = height + 4 + "px";
-            }
-            selectedAnnoteEl = annoteEl;
-          }
-        };
-        const unselectCodeLines = () => {
-          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
-          elementsIds.forEach((elId) => {
-            const div = window.document.getElementById(elId);
-            if (div) {
-              div.remove();
-            }
-          });
-          selectedAnnoteEl = undefined;
-        };
-          // Handle positioning of the toggle
-      window.addEventListener(
-        "resize",
-        throttle(() => {
-          elRect = undefined;
-          if (selectedAnnoteEl) {
-            selectCodeLines(selectedAnnoteEl);
-          }
-        }, 10)
-      );
-      function throttle(fn, ms) {
-      let throttle = false;
-      let timer;
-        return (...args) => {
-          if(!throttle) { // first call gets through
-              fn.apply(this, args);
-              throttle = true;
-          } else { // all the others get throttled
-              if(timer) clearTimeout(timer); // cancel #2
-              timer = setTimeout(() => {
-                fn.apply(this, args);
-                timer = throttle = false;
-              }, ms);
-          }
+        return estimates;
+      }
+
+      function addEstimates(feature, estimates) {
+        const geoid = `14000US${feature.properties.GEOID}`;
+        const source = estimates[geoid]?.B25070?.estimate;
+        if (!source) return null;
+        const total = Number(source.B25070001);
+        const burdened = [7, 8, 9, 10].reduce((sum, group) => sum + Number(source[`B250700${String(group).padStart(2, "0")}`] || 0), 0);
+        const notComputed = Number(source.B25070011 || 0);
+        const eligible = total - notComputed;
+        if (!Number.isFinite(total) || eligible <= 0) return null;
+        return {
+          geoid: feature.properties.GEOID,
+          name: feature.properties.NAME || `Census tract ${feature.properties.BASENAME || ""}`,
+          renters: total,
+          burdened,
+          eligible,
+          share: burdened / eligible
         };
       }
-        // Attach click handler to the DT
-        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
-        for (const annoteDlNode of annoteDls) {
-          annoteDlNode.addEventListener('click', (event) => {
-            const clickedEl = event.target;
-            if (clickedEl !== selectedAnnoteEl) {
-              unselectCodeLines();
-              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
-              if (activeEl) {
-                activeEl.classList.remove('code-annotation-active');
-              }
-              selectCodeLines(clickedEl);
-              clickedEl.classList.add('code-annotation-active');
-            } else {
-              // Unselect the line
-              unselectCodeLines();
-              clickedEl.classList.remove('code-annotation-active');
+
+      function featureStyle(feature) {
+        const share = feature.properties.rentData?.share;
+        return {
+          color: "#fffefa",
+          weight: 0.8,
+          opacity: 1,
+          fillColor: shareColor(share),
+          fillOpacity: Number.isFinite(share) ? 0.82 : 0.25
+        };
+      }
+
+      function focusTract(tract, layer) {
+        if (selectedLayer) selectedLayer.setStyle(featureStyle(selectedLayer.feature));
+        selectedLayer = layer;
+        selectedLayer.setStyle({ color: "#173d3c", weight: 2.5, fillOpacity: 0.95 });
+        map.fitBounds(layer.getBounds(), { padding: [28, 28], maxZoom: 13 });
+        layer.openTooltip();
+        document.querySelectorAll("#tract-rows tr[aria-selected='true']").forEach((row) => row.setAttribute("aria-selected", "false"));
+        const row = document.querySelector(`#tract-rows tr[data-geoid="${tract.geoid}"]`);
+        if (row) {
+          row.setAttribute("aria-selected", "true");
+          row.scrollIntoView({ block: "nearest" });
+        }
+      }
+
+      function renderTable() {
+        const query = search.value.trim().toLowerCase();
+        const matches = [...tracts]
+          .filter((tract) => `${tract.name} ${tract.geoid}`.toLowerCase().includes(query))
+          .sort((a, b) => b.share - a.share);
+        rows.replaceChildren();
+        tableStatus.textContent = `Showing ${matches.length.toLocaleString("en-US")} of ${tracts.length.toLocaleString("en-US")} census tracts, highest burden first.`;
+        if (!matches.length) {
+          const row = document.createElement("tr");
+          const cell = document.createElement("td");
+          cell.className = "empty-row";
+          cell.colSpan = 4;
+          cell.textContent = "No tracts match that search.";
+          row.append(cell);
+          rows.append(row);
+          return;
+        }
+        for (const tract of matches) {
+          const row = document.createElement("tr");
+          row.tabIndex = 0;
+          row.dataset.geoid = tract.geoid;
+          row.setAttribute("aria-label", `${tract.name}, ${formatCount(tract.renters)} renter households, ${(tract.share * 100).toFixed(1)} percent rent-burdened`);
+          const name = document.createElement("td");
+          name.className = "tract-name";
+          name.textContent = tract.name;
+          const renterCell = document.createElement("td");
+          renterCell.className = "numeric";
+          renterCell.textContent = formatCount(tract.renters);
+          const burdenedCell = document.createElement("td");
+          burdenedCell.className = "numeric";
+          burdenedCell.textContent = formatCount(tract.burdened);
+          const shareCell = document.createElement("td");
+          shareCell.className = "numeric";
+          const badge = document.createElement("span");
+          badge.className = "share-cell";
+          badge.style.backgroundColor = shareColor(tract.share);
+          badge.textContent = `${(tract.share * 100).toFixed(1)}%`;
+          shareCell.append(badge);
+          row.append(name, renterCell, burdenedCell, shareCell);
+          row.addEventListener("click", () => focusTract(tract, tractLayer.getLayers().find((layer) => layer.feature.properties.rentData?.geoid === tract.geoid)));
+          row.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              focusTract(tract, tractLayer.getLayers().find((layer) => layer.feature.properties.rentData?.geoid === tract.geoid));
             }
           });
+          rows.append(row);
         }
-    const findCites = (el) => {
-      const parentEl = el.parentElement;
-      if (parentEl) {
-        const cites = parentEl.dataset.cites;
-        if (cites) {
-          return {
-            el,
-            cites: cites.split(' ')
-          };
-        } else {
-          return findCites(el.parentElement)
-        }
-      } else {
-        return undefined;
       }
-    };
-    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-    for (var i=0; i<bibliorefs.length; i++) {
-      const ref = bibliorefs[i];
-      const citeInfo = findCites(ref);
-      if (citeInfo) {
-        tippyHover(citeInfo.el, function() {
-          var popup = window.document.createElement('div');
-          citeInfo.cites.forEach(function(cite) {
-            var citeDiv = window.document.createElement('div');
-            citeDiv.classList.add('hanging-indent');
-            citeDiv.classList.add('csl-entry');
-            var biblioDiv = window.document.getElementById('ref-' + cite);
-            if (biblioDiv) {
-              citeDiv.innerHTML = biblioDiv.innerHTML;
-            }
-            popup.appendChild(citeDiv);
+
+      function updateSummary() {
+        const renters = tracts.reduce((sum, tract) => sum + tract.renters, 0);
+        const burdened = tracts.reduce((sum, tract) => sum + tract.burdened, 0);
+        const eligible = tracts.reduce((sum, tract) => sum + tract.eligible, 0);
+        document.getElementById("overall-share").textContent = `${(100 * burdened / eligible).toFixed(1)}%`;
+        document.getElementById("total-burdened").textContent = formatCount(burdened);
+        document.getElementById("total-renters").textContent = formatCount(renters);
+        document.getElementById("tract-count").textContent = formatCount(tracts.length);
+      }
+
+      function downloadCsv() {
+        const header = ["GEOID", "census_tract", "renter_households", "eligible_renter_households", "rent_burdened_households", "rent_burdened_share"];
+        const records = tracts.map((tract) => [
+          tract.geoid,
+          `"${tract.name.replaceAll('"', '""')}"`,
+          tract.renters,
+          tract.eligible,
+          tract.burdened,
+          tract.share.toFixed(5)
+        ].join(","));
+        const blob = new Blob([[header.join(","), ...records].join("\n")], { type: "text/csv;charset=utf-8" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "broward-rent-burden-2024-acs.csv";
+        link.click();
+        URL.revokeObjectURL(link.href);
+      }
+
+      async function loadData() {
+        dataStatus.classList.remove("error");
+        dataStatus.textContent = "";
+        mapStatus.textContent = "Loading census tract boundaries...";
+        tableStatus.textContent = "Loading tract estimates";
+        downloadButton.disabled = true;
+        rows.innerHTML = '<tr><td class="empty-row" colspan="4">Loading tract estimates...</td></tr>';
+        try {
+          const params = new URLSearchParams({
+            where: "STATE='12' AND COUNTY='011'",
+            outFields: "GEOID,NAME,BASENAME",
+            returnGeometry: "true",
+            outSR: "4326",
+            f: "geojson",
+            resultRecordCount: "1000"
           });
-          return popup.innerHTML;
-        });
+          const geojson = await fetchJson(`${geometryUrl}?${params}`);
+          if (!Array.isArray(geojson.features) || !geojson.features.length) {
+            throw new Error("The Census boundary service returned no Broward County tracts.");
+          }
+          mapStatus.textContent = `Loading ACS estimates for ${geojson.features.length} tracts...`;
+          const ids = geojson.features.map((feature) => `14000US${feature.properties.GEOID}`);
+          const estimates = await loadEstimates(ids);
+          tracts = [];
+          for (const feature of geojson.features) {
+            const tract = addEstimates(feature, estimates);
+            if (tract) {
+              feature.properties.rentData = tract;
+              tracts.push(tract);
+            }
+          }
+          if (tracts.length !== geojson.features.length) {
+            throw new Error(`ACS data matched ${tracts.length} of ${geojson.features.length} tract boundaries.`);
+          }
+          if (tractLayer) map.removeLayer(tractLayer);
+          tractLayer = L.geoJSON(geojson, {
+            style: featureStyle,
+            onEachFeature: (feature, layer) => {
+              const tract = feature.properties.rentData;
+              layer.bindTooltip(tract
+                ? `<strong>${tract.name}</strong>${(tract.share * 100).toFixed(1)}% rent-burdened`
+                : "No estimate available");
+              layer.on({
+                mouseover: (event) => {
+                  if (selectedLayer !== event.target) event.target.setStyle({ weight: 2, color: "#315b57", fillOpacity: 0.96 });
+                  event.target.bringToFront();
+                },
+                mouseout: (event) => {
+                  if (selectedLayer !== event.target) tractLayer.resetStyle(event.target);
+                },
+                click: () => {
+                  if (tract) focusTract(tract, layer);
+                }
+              });
+            }
+          }).addTo(map);
+          map.fitBounds(tractLayer.getBounds(), { padding: [12, 12] });
+          mapView.classList.add("is-interactive");
+          staticMap.setAttribute("aria-hidden", "true");
+          interactiveMap.setAttribute("aria-hidden", "false");
+          updateSummary();
+          renderTable();
+          downloadButton.disabled = false;
+          mapStatus.textContent = `Showing ${tracts.length} Broward County census tracts.`;
+          dataStatus.textContent = "Estimates are from the 2020-2024 ACS 5-year survey.";
+        } catch (error) {
+          mapStatus.textContent = "Census data could not be loaded.";
+          dataStatus.classList.add("error");
+          dataStatus.textContent = `${error.message} Check your connection, then reload the page to try again.`;
+          tableStatus.textContent = "Tract data unavailable";
+          rows.innerHTML = '<tr><td class="empty-row" colspan="4">The tract table is unavailable until the data can be loaded.</td></tr>';
+          throw error;
+        }
       }
-    }
-  });
+
+      search.addEventListener("input", renderTable);
+      downloadButton.addEventListener("click", downloadCsv);
+      try {
+        initMap();
+        loadData().catch((error) => console.error("Unable to load Broward rent-burden data:", error));
+      } catch (error) {
+        mapStatus.textContent = "Showing the Broward tract map. Interactive map controls are unavailable.";
+        dataStatus.classList.add("error");
+        dataStatus.textContent = `${error.message} Check your connection, then reload the page.`;
+        console.error("Unable to initialize the Broward map:", error);
+      }
+    })();
   </script>
-</div> <!-- /content -->
-
-
-
-
-</body></html>
+</body>
+</html>
