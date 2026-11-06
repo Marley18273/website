@@ -2,15 +2,29 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "Where Is Rent Hardest to Afford?",
+    "title": "Priced Out of Broward",
     "section": "",
-    "text": "Rent burden is commonly defined as spending at least 30% of household income on gross rent. This page uses 2024 American Community Survey (ACS) 5-year estimates for renter households in Broward County."
+    "text": "Broward County, Florida\n\n\n\n\nWhere is rent hardest to afford? Explore the share of renter households spending at least 30% of their income on rent, tract by tract.\n\n 2024 American Community Survey · 5-year estimates\n\n\n\n\nRent-burdened share65.2%of renter households with a computed ratio\n\n\nRent-burdened households169,949estimated across Broward County\n\n\nRenter households274,613ACS estimate, all rent-to-income ratios\n\n\nCensus tracts417tracts in Broward County\n\n\n\n\nEach shape is a census tract. Darker red means more renters are burdened—and rent is harder to afford.\n\n\n\nShare of renter households paying 30% or moreHover over a tract for its estimate. The interactive map loads when available.\n\n\nRent-burdened renters: Under 45% 45–59% 60–69% 70%+ · hardest to afford\n\n\n\n\n\n\n\n\n\nShowing the Broward tract map. Loading interactive controls…About the ACS ↗\n\n\n\n\n\n\n\nSearch by tract number or GEOID. Select a row to locate it on the map.\n⌕\n\n\nLoading tract estimates…Download CSV\n\n\n\n\n\n\nCensus tract\n\n\nRenter households\n\n\nBurdened households\n\n\nRent-burdened share\n\n\n\n\n\n\nLoading tract estimates…\n\n\n\n\n\n\n\n\n\nHouseholds spending 30% or more of their income on gross rent. The tract share is burdened households divided by renter households for whom the ACS computed a rent-to-income ratio; households marked “not computed” are excluded from that denominator.\n\n\n\nThese are estimates from the 2020–2024 ACS 5-year survey, not a count of every household. A tract’s estimate has a margin of error, and small differences between neighboring tracts may not be meaningful. Map boundaries: U.S. Census TIGER/Line.\n\n\n\nSource: U.S. Census Bureau, 2024 ACS 5-year estimates, table B25070. Estimates retrieved from Census Reporter; boundaries from Census TIGERweb. Map tiles © OpenStreetMap contributors."
   },
   {
-    "objectID": "index.html#rent-burden-by-census-tract",
-    "href": "index.html#rent-burden-by-census-tract",
-    "title": "Where Is Rent Hardest to Afford?",
-    "section": "Rent burden by census tract",
-    "text": "Rent burden by census tract\nUse the search box to find a tract or GEOID. The share is the estimated percentage of renter households paying 30% or more of income on gross rent.\nSearch tracts \n\nDownload the tract data (CSV)\n\n\nLoading census data…\n\n\n\n\n\n\nCensus tract\n\n\nRenter households\n\n\nRent-burdened households\n\n\nRent-burdened share\n\n\n\n\n\n\n\nSource: U.S. Census Bureau, 2024 ACS 5-year estimates, table B25070. Rent-burdened households include those spending 30.0% or more of income on gross rent."
+    "objectID": "index.html#the-rent-burden-map",
+    "href": "index.html#the-rent-burden-map",
+    "title": "Priced Out of Broward",
+    "section": "",
+    "text": "Each shape is a census tract. Darker red means more renters are burdened—and rent is harder to afford.\n\n\n\nShare of renter households paying 30% or moreHover over a tract for its estimate. The interactive map loads when available.\n\n\nRent-burdened renters: Under 45% 45–59% 60–69% 70%+ · hardest to afford\n\n\n\n\n\n\n\n\n\nShowing the Broward tract map. Loading interactive controls…About the ACS ↗"
+  },
+  {
+    "objectID": "index.html#explore-every-tract",
+    "href": "index.html#explore-every-tract",
+    "title": "Priced Out of Broward",
+    "section": "",
+    "text": "Search by tract number or GEOID. Select a row to locate it on the map.\n⌕\n\n\nLoading tract estimates…Download CSV\n\n\n\n\n\n\nCensus tract\n\n\nRenter households\n\n\nBurdened households\n\n\nRent-burdened share\n\n\n\n\n\n\nLoading tract estimates…\n\n\n\n\n\n\n\n\n\nHouseholds spending 30% or more of their income on gross rent. The tract share is burdened households divided by renter households for whom the ACS computed a rent-to-income ratio; households marked “not computed” are excluded from that denominator.\n\n\n\nThese are estimates from the 2020–2024 ACS 5-year survey, not a count of every household. A tract’s estimate has a margin of error, and small differences between neighboring tracts may not be meaningful. Map boundaries: U.S. Census TIGER/Line.\n\n\n\nSource: U.S. Census Bureau, 2024 ACS 5-year estimates, table B25070. Estimates retrieved from Census Reporter; boundaries from Census TIGERweb. Map tiles © OpenStreetMap contributors."
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "About this site"
   }
 ]
